@@ -17,6 +17,6 @@ Lab 6- Tic Tac Toe game with arrays
 
 Lab 7- Implementing a game called Reversi (2 Player)
 
-Lab 8-
+Lab 8- Building on lab 8 in order to create an Ai that can beat 2 AIs made by proffesors
 
 Lab 9-
