@@ -9,7 +9,7 @@ Lab 2- create program involving cost of borrowing calculations
 
 Lab 3- Budgeting program that takes and validates user inputs and produces useful data to make decisions based on. Creates different outputs based on user decisions
 
-Lab 4- Program that performs integration and 
+Lab 4- Program that performs integration of polynomials 
 
 Lab 5-
 
