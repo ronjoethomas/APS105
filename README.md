@@ -11,7 +11,7 @@ Lab 3- Budgeting program that takes and validates user inputs and produces usefu
 
 Lab 4- Program that performs integration of polynomials 
 
-Lab 5-
+Lab 5- 3 part lab that implements an encriptions algorithim, a popular dice game called craps and Zeller Alogrithim
 
 Lab 6-
 
