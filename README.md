@@ -13,7 +13,7 @@ Lab 4- Program that performs integration of polynomials
 
 Lab 5- 3 part lab that implements an encriptions algorithim, a popular dice game called craps and Zeller Alogrithim
 
-Lab 6-
+Lab 6- Tic Tac Toe game with arrays
 
 Lab 7-
 
