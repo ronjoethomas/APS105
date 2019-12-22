@@ -7,7 +7,7 @@ Lab 1- create basic program that does simple calculations based on user inputs a
 
 Lab 2- create program involving cost of borrowing calculations
 
-Lab 3-
+Lab 3- Budgeting program that takes and validates user inputs and produces useful data to make decisions based on. Creates different outputs based on user decisions
 
 Lab 4- 
 
