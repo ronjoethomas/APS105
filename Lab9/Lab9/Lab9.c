@@ -1,0 +1,401 @@
+//
+// APS105 Lab 9
+//
+// This is a program written to maintain a personal music library,
+// using a linked list to hold the songs in the library.
+//
+// Author: Ron Thomas
+// Student Number:1005145629
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdbool.h>
+
+// A node in the linked list
+
+// Each string in the node is declared as a character pointer variable,
+// so they need to be dynamically allocated using the malloc() function,
+// and deallocated using the free() function after use.
+
+
+typedef struct node {
+    char *artist;
+    char *songName;
+    char *genre;
+    struct node *next;
+} Node;
+
+// Declarations of linked list functions
+//this is a pointer of type Node which points to a type node structure
+
+typedef struct linkedList{
+	Node *head;
+}LinkedList;
+
+// DECLARE YOUR LINKED-LIST FUNCTIONS HERE
+bool checkListEmpty(LinkedList *list);
+bool insertSongFront(LinkedList *musicList, char *artist, char *songName, char *genre);
+bool insertSongLast(LinkedList *musicList, char *artist,char *songName, char *genre);
+bool alphabeticalSongOrder(LinkedList *musicList,char *artist, char *songName, char *genre);
+Node *addNewSong(char *artist,char *songName,char *genre);
+void printLibrary(LinkedList *musicList);
+Node *searchThroughList(LinkedList *musicList,char *promptName);
+void deleteAllSong(LinkedList *musicList);
+void deleteFirstSong(LinkedList *musicList);
+bool deleteSingleSong(LinkedList *musicList,char *promptDeleteSong);
+
+
+// Declarations of support functions
+// See below the main function for descriptions of what these functions do
+
+void inputStringFromUser(char *prompt, char *s, int arraySize);
+void songNameDuplicate(char *songName);
+void songNameFound(char *songName);
+void songNameNotFound(char *songName);
+void songNameDeleted(char *songName);
+void artistFound(char *artist);
+void artistNotFound(char *artist);
+void printMusicLibraryEmpty(void);
+void printMusicLibraryTitle(void);
+
+const int MAX_LENGTH = 1024;
+
+int main(void) {
+    // Declare the head of the linked list.
+    LinkedList *musicList=(LinkedList*)malloc(sizeof(LinkedList));;
+	musicList-> head=NULL;
+
+    // Announce the start of the program
+    printf("Personal Music Library.\n\n");
+    printf("%s", "Commands are I (insert), D (delete), S (search by song name),\n"
+           "P (print), Q (quit).\n");
+
+    char response;
+    char input[MAX_LENGTH + 1];
+    do {
+        inputStringFromUser("\nCommand", input, MAX_LENGTH);
+
+        // Response is the first character entered by user.
+        // Convert to uppercase to simplify later comparisons.
+        response = toupper(input[0]);
+		
+		//declar all the strings that use dynamically allocated space
+		char *promptName = malloc((MAX_LENGTH+1)*sizeof(char));
+		char *promptArtist =  malloc((MAX_LENGTH+1)*sizeof(char));
+		char *promptGenre = malloc((MAX_LENGTH+1)*sizeof(char));
+		char *promptDelete=malloc((MAX_LENGTH+1)*sizeof(char));
+		char *promptSearch=malloc((MAX_LENGTH+1)*sizeof(char));
+
+        if (response == 'I') {
+            // Insert a song into the linked list.
+            // Maintain the list in alphabetical order by song name.
+            // USE THE FOLLOWING STRINGS WHEN PROMPTING FOR DATA:
+			
+			inputStringFromUser("Song Name", promptName, MAX_LENGTH);
+			inputStringFromUser("Artist", promptArtist, MAX_LENGTH);
+			inputStringFromUser("Genre", promptGenre, MAX_LENGTH);
+			
+			if(alphabeticalSongOrder(musicList,promptArtist, promptName, promptGenre)==false){
+				songNameDuplicate(promptName);
+				
+			}
+
+        }
+        else if (response == 'D') {
+            // Delete a song from the list.
+
+            char *prompt = "\nEnter the name of the song to be deleted" ;
+            inputStringFromUser(prompt, promptDelete, MAX_LENGTH);
+            if(deleteSingleSong(musicList,promptDelete)){
+                songNameDeleted(promptDelete);
+                
+            }
+            else{
+                songNameNotFound(promptDelete);
+                
+                
+            }
+
+            
+
+            //   ADD STATEMENT(S) HERE
+
+        }
+        else if (response == 'S') {
+            // Search for a song by its name.
+            char *prompt = "\nEnter the name of the song to search for" ;
+            inputStringFromUser(prompt, promptSearch, MAX_LENGTH);
+
+            Node *temp=searchThroughList(musicList,promptSearch);
+            if(temp!=NULL){
+                songNameFound(temp->songName);
+                //print statements 
+                printf("\n%s\n",temp->songName);
+                printf("%s\n",temp->artist);
+                printf("%s\n",temp->genre);
+            }
+            else{
+                songNameNotFound(promptSearch);
+                
+            }            
+            
+        }
+        else if (response == 'P') {
+            // Print the music library.
+			
+			if(musicList->head==NULL){
+				printMusicLibraryEmpty();
+			}
+			else{
+				printMusicLibraryTitle();
+				
+				printLibrary(musicList);
+			}
+
+            //   ADD STATEMENT(S) HERE
+
+        }
+        else if (response == 'Q') {
+            deleteAllSong(musicList);
+            printMusicLibraryEmpty();
+			
+			//free all the dyamically allocated strings used
+			free(promptArtist);
+			free(promptDelete);
+			free(promptName);
+			free(promptGenre);
+			free(promptSearch);
+			
+			
+        }
+        else {
+            // do this if no command matched ...
+            printf ("\nInvalid command.\n");
+        }
+    } while (response != 'Q');
+
+    // Delete the entire linked list.
+    //   already freed all strings and nodes in ==Q response.
+	free(musicList);
+
+    // Print the linked list to confirm deletion.
+    printLibrary(musicList);
+
+    return 0;
+}
+
+// Support Function Definitions
+
+// Prompt the user for a string safely, without buffer overflow
+void inputStringFromUser(char *prompt, char *s, int maxStrLength) {
+    int i = 0;
+    char c;
+
+    printf("%s --> ", prompt);
+    while (i < maxStrLength && (c = getchar()) != '\n')
+        s[i++] = c;
+    s[i] = '\0';
+}
+
+// Function to call when the user is trying to insert a song name
+// that is already in the personal music library.
+void songNameDuplicate(char *songName) {
+    printf("\nA song with the name '%s' is already in the music library.\n"
+           "No new song entered.\n", songName);
+}
+
+// Function to call when a song name was found in the personal music library.
+void songNameFound(char *songName) {
+    printf("\nThe song name '%s' was found in the music library.\n",
+           songName);
+}
+
+// Function to call when a song name was not found in the personal music library.
+void songNameNotFound(char *songName) {
+    printf("\nThe song name '%s' was not found in the music library.\n",
+           songName);
+}
+
+// Function to call when a song name that is to be deleted
+// was found in the personal music library.
+void songNameDeleted(char *songName) {
+    printf("\nDeleting a song with name '%s' from the music library.\n",
+           songName);
+}
+
+// Function to call when printing an empty music library.
+void printMusicLibraryEmpty(void) {
+    printf("\nThe music library is empty.\n");
+}
+
+// Function to call to print a title when the entire music library is printed.
+void printMusicLibraryTitle(void) {
+    printf("\nMy Personal Music Library: \n");
+}
+
+// Add your functions below this line.
+bool checkListEmpty(LinkedList *list){
+	if(list->head==NULL){
+		return true;
+	}
+	return false;
+}
+
+
+//checks memory availability and creates a new Node for new added song based.
+Node *addNewSong(char *artist,char *songName,char *genre){
+	Node *newSong=(Node*)malloc(sizeof(Node));
+	if(newSong!=NULL){ //checking if space was avaiable in memory
+		newSong->artist=artist;
+		newSong->songName=songName;
+		newSong->genre=genre;
+	}
+	return newSong;
+}
+
+bool insertSongFront(LinkedList *musicList, char *artist, char *songName, char *genre){
+	if(checkListEmpty(musicList)==true){
+		musicList->head=addNewSong(artist,songName,genre);
+		return musicList!=NULL;
+		
+	}
+	Node *temp=addNewSong(artist,songName,genre);
+	if(temp==NULL){
+		return false;//unable to find space
+	}
+	temp->next=musicList->head;//links the new soon to be #1 node to new #2 node
+	musicList->head=temp;//assigns musicList to new #1 node;
+	return true;
+}
+
+//adding some to end of list
+bool insertSongLast(LinkedList *musicList, char *artist,char *songName, char *genre){
+	if(checkListEmpty(musicList)==true){
+		return insertSongFront(musicList,artist,songName,genre);
+	}
+	
+	Node *temp=musicList->head;
+	//go through list until last node reached (symbolified by pointing to null)
+	while(temp->next!=NULL){
+		temp=temp->next;
+	}
+	
+	temp->next=addNewSong(artist,songName,genre);
+	if(temp->next==NULL){
+		return false;
+	}
+	return true;
+}
+
+bool alphabeticalSongOrder(LinkedList *musicList,char *artist, char *songName, char *genre){
+	
+	if(checkListEmpty(musicList)==true){
+		return insertSongFront(musicList,artist,songName,genre);
+	}
+	if(strcmp(songName,musicList->head->songName)<0){ //new song names old first song precedes 
+		
+		return insertSongFront(musicList,artist,songName,genre);
+	}
+	
+	Node *n=musicList->head;
+	while(n->next!=NULL&&strcmp(songName,n->songName)>0){//goes through until the song is in the write place or last node is reached
+	n=n->next;
+	}
+	if(strcmp(songName,n->songName)==0){//duplicate
+		return false;
+	}
+	
+	Node *temp=addNewSong(artist,songName,genre);
+	if(temp==NULL){
+		return false;
+	}
+	
+	temp->next=n->next;//links what n was linked to temp so it can continued to be linked
+	n->next=temp;//connects next song into the list in the correct order.
+	return true;
+	
+}
+
+void printLibrary(LinkedList *musicList){
+	Node *temp=musicList->head;
+	while(temp!=NULL){
+		printf("\n\n%s\n",temp->songName);
+		printf("%s\n",temp->artist);
+		printf("%s\n",temp->genre);
+        temp=temp->next;
+	}
+}
+
+Node *searchThroughList(LinkedList *musicList,char *promptName){
+    Node *temp=musicList->head;
+    while(temp!=NULL){
+        if(strcmp(promptName,temp->songName)==0){
+            return temp;
+            
+            
+        }
+        temp=temp->next;
+    }
+    
+    return temp;
+    
+}
+
+void deleteFirstSong(LinkedList *musicList){
+    if(checkListEmpty(musicList)==true){
+        
+        return;
+    }
+    
+    Node *newHead=musicList->head->next;
+    songNameDeleted(musicList->head->songName);
+    //Free up the memory used by the current head
+    free(musicList->head);
+    //update current head
+    musicList->head=newHead;
+}
+
+void deleteAllSong(LinkedList *musicList){
+    
+    //going through all deleting first songs untill all songs are done
+    while(checkListEmpty(musicList)==false){
+        deleteFirstSong(musicList);
+    }
+    
+    //list is empty (does not point to any nodes)
+    musicList->head=NULL;
+
+}
+
+bool deleteSingleSong(LinkedList *musicList,char *promptDeleteSong){
+    if(checkListEmpty(musicList)==true){
+        
+        return false;//nothing to delete
+    }
+    
+    if(strcmp(musicList->head->songName,promptDeleteSong)==0){
+        //if first song is to be deleted transfer pointers to continue chain
+        Node *temp=musicList->head->next;
+        free(musicList->head);
+        musicList->head=temp;
+        return true;
+    }
+    
+    //if it is not the first song, try to find where it is
+    
+    Node *temp2=musicList->head;
+    while(temp2->next!=NULL&&strcmp(temp2->next->songName,promptDeleteSong)!=0){
+        temp2=temp2->next;
+    }
+    
+    if(temp2->next!=NULL){//if song name has been found, delete it while still maintaing the list
+        
+        Node *temp3=temp2->next;
+        temp2->next=temp3->next;
+        free(temp3);
+        return true;
+    }
+    return false;//means that value has not been found
+}
