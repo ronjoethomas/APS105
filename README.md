@@ -15,7 +15,7 @@ Lab 5- 3 part lab that implements an encriptions algorithim, a popular dice game
 
 Lab 6- Tic Tac Toe game with arrays
 
-Lab 7-
+Lab 7- Implementing a game called Reversi (2 Player)
 
 Lab 8-
 
